@@ -1,0 +1,41 @@
+// Cover image
+<Image 
+  src={guide.profileImage}
+  alt={`${guide.name}, tour guide in ${guide.location} - cover image`}
+  fill
+  sizes="100vw"
+  style={{ objectFit: "cover" }}
+  className="opacity-40"
+  unoptimized
+/>
+
+// Profile photo
+<Image 
+  src={guide.profileImage}
+  alt={`${guide.name} - profile photo`}
+  fill
+  sizes="128px"
+  style={{ objectFit: "cover" }}
+  unoptimized
+/>
+
+// Gallery images
+<Image 
+  src={image}
+  alt={`${guide.name}'s tour in ${guide.location} - gallery image ${index + 1}`}
+  fill
+  sizes="(max-width: 768px) 100vw, 50vw"
+  style={{ objectFit: "cover" }}
+  className="hover:opacity-90 transition-opacity"
+  unoptimized
+/>
+
+// Tour image
+<Image 
+  src={tour.image}
+  alt={`${tour.title} - Tour offered by ${guide.name} in ${guide.location}`}
+  fill
+  sizes="(max-width: 768px) 100vw, 25vw"
+  style={{ objectFit: "cover" }}
+  unoptimized
+/> 
