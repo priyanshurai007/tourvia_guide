@@ -26,6 +26,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+      </head>
       <body className={`${inter.className} bg-gray-900 min-h-screen flex flex-col`}>
         <TransitionLayout>
           <LayoutWrapper>

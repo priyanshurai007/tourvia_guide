@@ -15,7 +15,13 @@ export interface IBooking extends Document {
   status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
   hasReviewed?: boolean;
   createdAt: Date;
+  referenceId?: string; // Optional field for reference ID from the payment gateway
 }
+
+
+// Create order with pending status
+// Take payment intant and ask for payment
+// User does the payment
 
 const bookingSchema = new Schema({
   travelerId: {

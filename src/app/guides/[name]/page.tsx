@@ -52,6 +52,13 @@ type Guide = {
   phone?: string;
 };
 
+// Add this near the top with other imports
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
+
 export default function GuideProfile({ params }: { params: { name: string } | Promise<{ name: string }> }) {
   // Unwrap params if it's a Promise
   const unwrappedParams = params instanceof Promise ? use(params) : params;
@@ -173,34 +180,31 @@ export default function GuideProfile({ params }: { params: { name: string } | Pr
     setSelectedDate(e.target.value);
   };
 
+  // Replace the existing handleBookTour function with this updated version
   const handleBookTour = async (tourId: string) => {
     try {
-      // Check if date is selected
       if (!selectedDate) {
         alert('Please select a date for your tour.');
         return;
       }
 
-      // Check if guide exists
       if (!guide) {
         alert('Guide information is missing. Please refresh the page and try again.');
         return;
       }
 
-      // Set loading state to true
       setBookingLoading(true);
 
-      // Check if user is logged in
-      const response = await fetch('/api/auth/check');
-      const data = await response.json();
+      // Check authentication
+      const authResponse = await fetch('/api/auth/check');
+      const authData = await authResponse.json();
 
-      if (!data.isAuthenticated) {
+      if (!authData.isAuthenticated) {
         setBookingLoading(false);
         setShowLoginPrompt(true);
         return;
       }
 
-      // Find the selected tour object from our state
       const tour = validTours.find(t => t.id === tourId);
       if (!tour) {
         setBookingLoading(false);
@@ -208,62 +212,105 @@ export default function GuideProfile({ params }: { params: { name: string } | Pr
         return;
       }
       
-      console.log("Selected tour:", tour);
-      console.log("Guide information:", guide);
-
-      // Create booking data with correct property names
+      // Create booking first
       const bookingData = {
         guideId: guide.id,
         guideName: guide.name,
         guideEmail: guide.email || '',
         guidePhone: guide.phone || '',
         tourId: tour.id,
-        tourName: tour.title || 'Custom Tour',
+        tourName: tour.title,
         date: selectedDate,
         participants: participants,
         totalPrice: tour.price * participants,
         status: 'pending'
       };
 
-      console.log("Sending booking data:", bookingData);
-
-      // Save booking to database
       const bookingResponse = await fetch('/api/bookings', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include', // Important for cookies
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(bookingData),
       });
 
-      console.log("Booking response status:", bookingResponse.status);
-
-      // Get the response data
       const bookingResult = await bookingResponse.json();
-      console.log("Booking result:", bookingResult);
-
-      // Set loading to false once we get a response
-      setBookingLoading(false);
-
-      if (!bookingResponse.ok) {
-        throw new Error(bookingResult.error || 'Failed to create booking');
-      }
       
-      if (bookingResult.success) {
-        setBookingSuccess(true);
-        setTimeout(() => {
-          setSelectedDate('');
-          setParticipants(1);
-          setBookingSuccess(false);
-        }, 5000); // Longer display of success message
-      } else {
+      if (!bookingResult.success) {
         throw new Error(bookingResult.error || 'Failed to create booking');
       }
+
+      // Initialize payment
+      const paymentResponse = await fetch('/api/payment/create', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          bookingId: bookingResult.booking.id,
+          amount: bookingResult.booking.totalPrice,
+        }),
+      });
+
+      const paymentData = await paymentResponse.json();
+
+      if (!paymentData.success) {
+        throw new Error('Failed to initialize payment');
+      }
+
+      // Configure Razorpay options
+      const options = {
+        key: paymentData.key,
+        amount: paymentData.order.amount,
+        currency: paymentData.order.currency,
+        name: "Tour Booking",
+        description: `Booking for ${tour.title}`,
+        order_id: paymentData.order.id,
+        handler: async function(response: any) {
+          try {
+            // Verify payment
+            const verifyResponse = await fetch('/api/payment/verify', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_signature: response.razorpay_signature
+              }),
+            });
+
+            const verifyData = await verifyResponse.json();
+            
+            if (verifyData.success) {
+              setBookingSuccess(true);
+              setTimeout(() => {
+                setSelectedDate('');
+                setParticipants(1);
+                setBookingSuccess(false);
+              }, 5000);
+            } else {
+              alert('Payment verification failed. Please contact support.');
+            }
+          } catch (error) {
+            console.error('Payment verification error:', error);
+            alert('Payment verification failed. Please contact support.');
+          }
+          setBookingLoading(false);
+        },
+        prefill: {
+          name: authData.user?.name,
+          email: authData.user?.email,
+        },
+        theme: {
+          color: "#f97316"
+        }
+      };
+
+      // Initialize Razorpay
+      const razorpay = new window.Razorpay(options);
+      razorpay.open();
+
     } catch (error) {
       setBookingLoading(false);
       console.error('Booking error:', error);
-      alert(error instanceof Error ? error.message : 'Failed to create booking. Please try again.');
+      alert(error instanceof Error ? error.message : 'Failed to process booking. Please try again.');
     }
   };
 
@@ -584,4 +631,4 @@ export default function GuideProfile({ params }: { params: { name: string } | Pr
       </div>
     </div>
   );
-} 
+}
