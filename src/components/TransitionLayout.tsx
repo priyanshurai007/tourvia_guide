@@ -31,9 +31,9 @@ export default function TransitionLayout({ children }: TransitionLayoutProps) {
         {isLoading && (
           <motion.div
             className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-50 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
+            initial={{ opacity: 1 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            exit={{ opacity: 1 }}
             transition={{ duration: 0.3 }}
           >
             <div className="flex flex-col items-center space-y-4">
@@ -57,9 +57,9 @@ export default function TransitionLayout({ children }: TransitionLayoutProps) {
       <AnimatePresence mode="wait">
         <motion.div
           key={pathname}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 1, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -20 }}
+          exit={{ opacity: 1, y: -20 }}
           transition={{ duration: 0.3 }}
         >
           {children}
