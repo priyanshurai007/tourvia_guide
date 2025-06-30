@@ -20,7 +20,7 @@ export async function GET(
 ) {
   try {
     const bookingId = params.bookingId;
-    
+
     if (!bookingId) {
       return NextResponse.json(
         { success: false, error: 'Booking ID is required' },
@@ -78,10 +78,10 @@ export async function GET(
     // Verify that the user is authorized to view this booking
     const userId = decoded.id;
     const isGuide = decoded.role === 'guide';
-    const isTraveler = decoded.role === 'traveler';
+    const isStudent = decoded.role === 'student';
 
     if (
-      (isTraveler && booking.travelerId.toString() !== userId) ||
+      (isStudent && booking.studentId.toString() !== userId) ||
       (isGuide && booking.guideId.toString() !== userId)
     ) {
       return NextResponse.json(
@@ -93,10 +93,10 @@ export async function GET(
     // Transform the booking for the response
     const bookingDetails = {
       id: booking._id.toString(),
-      traveler: {
-        id: booking.travelerId.toString(),
-        name: booking.travelerName,
-        email: booking.travelerEmail
+      student: {
+        id: booking.studentId.toString(),
+        name: booking.studentName,
+        email: booking.studentEmail
       },
       guide: {
         id: booking.guideId._id.toString(),

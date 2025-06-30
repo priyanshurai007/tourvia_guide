@@ -16,7 +16,7 @@ interface DecodedToken {
 export async function POST(request: Request) {
   try {
     console.log('Tour booking request received');
-    
+
     // Get token from cookies
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -36,7 +36,7 @@ export async function POST(request: Request) {
     // Connect to database and register models
     await connectDB();
     registerModels();
-    
+
     const user = await User.findById(decoded.id);
 
     if (!user) {
@@ -46,11 +46,11 @@ export async function POST(request: Request) {
         { status: 404 }
       );
     }
-    
-    if (user.role !== 'traveler') {
-      console.log(`User role not traveler: ${user.role}`);
+
+    if (user.role !== 'student') {
+      console.log(`User role not student: ${user.role}`);
       return NextResponse.json(
-        { success: false, error: 'Only travelers can create bookings' },
+        { success: false, error: 'Only students can create bookings' },
         { status: 403 }
       );
     }
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
     // Validate required fields
     const requiredFields = ['tourId', 'date', 'participants'];
     const missingFields = requiredFields.filter(field => !bookingData[field]);
-    
+
     if (missingFields.length > 0) {
       console.log(`Missing required fields: ${missingFields.join(', ')}`);
       return NextResponse.json(
@@ -73,7 +73,7 @@ export async function POST(request: Request) {
 
     // Get tour details
     const tour = await Tour.findById(bookingData.tourId).populate('guideId', 'name email');
-    
+
     if (!tour) {
       console.log(`Tour not found: ${bookingData.tourId}`);
       return NextResponse.json(
@@ -88,9 +88,9 @@ export async function POST(request: Request) {
     // Create new booking
     console.log('Creating new booking in database');
     const booking = new Booking({
-      travelerId: user._id,
-      travelerName: user.name,
-      travelerEmail: user.email,
+      studentId: user._id,
+      studentName: user.name,
+      studentEmail: user.email,
       guideId: tour.guideId._id,
       guideName: tour.guideId.name,
       tourId: tour._id,

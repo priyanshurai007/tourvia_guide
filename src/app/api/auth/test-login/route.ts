@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 
 export async function GET() {
   console.log('Test login endpoint called');
-  
+
   // Check if MongoDB URI is set
   const uri = process.env.MONGODB_URI;
   if (!uri) {
@@ -33,7 +33,7 @@ export async function GET() {
     const collections = await db.listCollections().toArray();
     const collectionNames = collections.map(c => c.name);
     console.log('Collections:', collectionNames);
-    
+
     if (!collectionNames.includes('users')) {
       return NextResponse.json(
         { success: false, error: 'Users collection not found', collections: collectionNames },
@@ -45,7 +45,7 @@ export async function GET() {
     const usersCollection = db.collection('users');
     const userCount = await usersCollection.countDocuments();
     console.log(`User count: ${userCount}`);
-    
+
     if (userCount === 0) {
       return NextResponse.json(
         { success: false, error: 'No users found in database' },
@@ -77,7 +77,7 @@ export async function GET() {
         id: sampleUser._id.toString(),
         name: sampleUser.name || 'Test User',
         email: sampleUser.email,
-        role: sampleUser.role || 'traveler',
+        role: sampleUser.role || 'student',
       },
       jwtSecret,
       { expiresIn: '1h' }

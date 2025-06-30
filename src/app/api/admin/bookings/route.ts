@@ -77,7 +77,7 @@ export async function GET(req: NextRequest) {
         const bookings = await Booking.find(query)
             .populate('guideId', 'name email phone avatar')
             .populate('tourId', 'title price')
-            .populate('travelerId', 'name email phone avatar')
+            .populate('studentId', 'name email phone avatar')
             .sort(sortOptions)
             .skip(skip)
             .limit(limit);
@@ -86,7 +86,7 @@ export async function GET(req: NextRequest) {
             ...booking.toObject(),
             guide: booking.guideId,
             tour: booking.tourId,
-            customer: booking.travelerId,
+            customer: booking.studentId,
         }));
 
         const totalPages = Math.ceil(total / limit);

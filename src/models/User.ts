@@ -5,7 +5,7 @@ export interface IUser extends Document {
   name: string;
   email: string;
   password: string;
-  role: 'traveler' | 'guide' | 'admin';
+  role: 'student' | 'guide' | 'admin';
   avatar: string;
   phone?: string;
   location?: string;
@@ -46,12 +46,12 @@ const userSchema = new Schema({
   },
   role: {
     type: String,
-    enum: ['traveler', 'guide', 'admin'],
-    default: 'traveler'
+    enum: ['student', 'guide', 'admin'],
+    default: 'student'
   },
   avatar: {
     type: String,
-    default: function() {
+    default: function () {
       return `https://ui-avatars.com/api/?name=${encodeURIComponent(this.name)}&background=random`;
     }
   },
@@ -100,14 +100,14 @@ const userSchema = new Schema({
 
 // Hash password before saving
 userSchema.pre('save', async function (next) {
-    if (this.isModified('password')) {
-        this.password = await bcrypt.hash(this.password, 8);
-    }
-    next();
+  if (this.isModified('password')) {
+    this.password = await bcrypt.hash(this.password, 8);
+  }
+  next();
 });
 
 // Method to compare passwords
-userSchema.methods.comparePassword = async function(candidatePassword: string): Promise<boolean> {
+userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
   return bcrypt.compare(candidatePassword, this.password);
 };
 
@@ -121,7 +121,7 @@ function getUserModel(): Model<IUser> {
   if (mongoose.models && mongoose.models.User) {
     return mongoose.models.User as Model<IUser>;
   }
-  
+
   // If the model doesn't exist, create and return it
   try {
     return mongoose.model<IUser>('User', userSchema);

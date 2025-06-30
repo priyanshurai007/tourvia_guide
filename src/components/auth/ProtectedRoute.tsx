@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { jwtDecode } from 'jwt-decode';
-import { getCookie } from 'cookies-next';
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { jwtDecode } from "jwt-decode";
+import { getCookie } from "cookies-next";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -18,43 +18,46 @@ interface DecodedToken {
   name: string;
 }
 
-export default function ProtectedRoute({ children, allowedRoles = ['traveler'] }: ProtectedRouteProps) {
+export default function ProtectedRoute({
+  children,
+  allowedRoles = ["student"],
+}: ProtectedRouteProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkAuth = () => {
-      const token = getCookie('token');
-      
+      const token = getCookie("token");
+
       if (!token) {
-        router.push('/login');
+        router.push("/login");
         return;
       }
 
       try {
         // Validate token format before decoding
-        if (typeof token !== 'string' || token.split('.').length !== 3) {
-          console.warn('Invalid token format, redirecting to login');
-          router.push('/login');
+        if (typeof token !== "string" || token.split(".").length !== 3) {
+          console.warn("Invalid token format, redirecting to login");
+          router.push("/login");
           return;
         }
-        
+
         // Check token expiration
         const decoded = jwtDecode<DecodedToken>(token);
         if (decoded.exp * 1000 < Date.now()) {
-          router.push('/login');
+          router.push("/login");
           return;
         }
-        
+
         if (!allowedRoles.includes(decoded.role)) {
-          router.push('/');
+          router.push("/");
           return;
         }
 
         setIsLoading(false);
       } catch (error) {
-        console.error('Auth check error:', error);
-        router.push('/login');
+        console.error("Auth check error:", error);
+        router.push("/login");
         return;
       }
     };
@@ -71,4 +74,4 @@ export default function ProtectedRoute({ children, allowedRoles = ['traveler'] }
   }
 
   return <>{children}</>;
-} 
+}

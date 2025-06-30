@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { FaUser, FaSignOutAlt, FaBars, FaTimes } from 'react-icons/fa';
-import { deleteCookie } from 'cookies-next';
-import { jwtDecode } from 'jwt-decode';
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { FaUser, FaSignOutAlt, FaBars, FaTimes } from "react-icons/fa";
+import { deleteCookie } from "cookies-next";
+import { jwtDecode } from "jwt-decode";
 
 interface User {
   _id: string;
@@ -24,7 +24,7 @@ interface DecodedToken {
   name: string;
 }
 
-export default function TravelerLayout({
+export default function StudentLayout({
   children,
 }: {
   children: React.ReactNode;
@@ -39,50 +39,56 @@ export default function TravelerLayout({
     const loadUser = async () => {
       try {
         // Check if user is authenticated using cookies
-        const token = document.cookie.split('; ').find(row => row.startsWith('token='));
-        
+        const token = document.cookie
+          .split("; ")
+          .find((row) => row.startsWith("token="));
+
         if (!token) {
           setIsAuthenticated(false);
           setIsLoading(false);
           return;
         }
-        
-        const tokenValue = token.split('=')[1];
-        
+
+        const tokenValue = token.split("=")[1];
+
         // Validate token format before decoding
-        if (!tokenValue || typeof tokenValue !== 'string' || tokenValue.split('.').length !== 3) {
-          console.warn('Invalid token format in traveler layout');
+        if (
+          !tokenValue ||
+          typeof tokenValue !== "string" ||
+          tokenValue.split(".").length !== 3
+        ) {
+          console.warn("Invalid token format in student layout");
           setIsAuthenticated(false);
           setIsLoading(false);
           return;
         }
-        
+
         const decoded = jwtDecode<DecodedToken>(tokenValue);
-        
+
         if (decoded.exp * 1000 < Date.now()) {
           setIsAuthenticated(false);
           setIsLoading(false);
           return;
         }
-        
-        if (decoded.role !== 'traveler') {
+
+        if (decoded.role !== "student") {
           setIsAuthenticated(false);
           setIsLoading(false);
           return;
         }
-        
+
         setIsAuthenticated(true);
-        
+
         // Fetch user data from the server
-        const response = await fetch('/api/auth/me');
+        const response = await fetch("/api/auth/me");
         if (!response.ok) {
-          throw new Error('Failed to fetch user data');
+          throw new Error("Failed to fetch user data");
         }
-        
+
         const userData = await response.json();
         setUser(userData);
       } catch (error) {
-        console.error('Error loading user:', error);
+        console.error("Error loading user:", error);
         setIsAuthenticated(false);
       } finally {
         setIsLoading(false);
@@ -95,24 +101,24 @@ export default function TravelerLayout({
   // Separate useEffect for redirection
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
-      router.push('/login');
+      router.push("/login");
     }
   }, [isLoading, isAuthenticated, router]);
 
   const handleLogout = () => {
     // Delete the token cookie
-    deleteCookie('token');
-    
+    deleteCookie("token");
+
     // Clear localStorage
-    localStorage.removeItem('user');
-    localStorage.removeItem('isLoggedIn');
-    
+    localStorage.removeItem("user");
+    localStorage.removeItem("isLoggedIn");
+
     // Broadcast logout event
-    const event = new Event('userLoggedOut');
+    const event = new Event("userLoggedOut");
     window.dispatchEvent(event);
-    
+
     // Redirect to login page
-    router.push('/login');
+    router.push("/login");
   };
 
   if (isLoading) {
@@ -147,7 +153,7 @@ export default function TravelerLayout({
       {/* Sidebar */}
       <div
         className={`fixed inset-y-0 left-0 z-40 w-64 bg-gray-800 transform ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
         } lg:translate-x-0 transition-transform duration-200 ease-in-out`}
       >
         {/* User info */}
@@ -155,8 +161,8 @@ export default function TravelerLayout({
           <div className="flex items-center space-x-3">
             <div className="relative w-10 h-10 rounded-full overflow-hidden">
               <Image
-                src={user?.avatar || '/images/default-avatar.png'}
-                alt={user?.name || 'User'}
+                src={user?.avatar || "/images/default-avatar.png"}
+                alt={user?.name || "User"}
                 fill
                 className="object-cover"
               />
@@ -171,7 +177,7 @@ export default function TravelerLayout({
         {/* Navigation */}
         <nav className="p-4 space-y-2">
           <Link
-            href="/traveler/dashboard"
+            href="/student/dashboard"
             className="flex items-center space-x-3 text-gray-300 hover:text-white p-2 rounded-md hover:bg-gray-700"
           >
             <FaUser />
@@ -197,4 +203,4 @@ export default function TravelerLayout({
       </div>
     </div>
   );
-} 
+}
