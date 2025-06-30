@@ -9,7 +9,7 @@ export async function GET() {
     console.log('Starting database test...');
     await connectDB();
     console.log('Connected to MongoDB!');
-    
+
     // Log connection status
     const connectionState = mongoose.connection.readyState;
     const stateMap = {
@@ -18,34 +18,34 @@ export async function GET() {
       2: 'connecting',
       3: 'disconnecting',
     };
-    
+
     console.log(`MongoDB connection state: ${stateMap[connectionState] || 'unknown'}`);
-    
+
     // Check if the User model exists
     const modelNames = mongoose.modelNames();
     console.log('Available models:', modelNames);
-    
+
     // Try to create a test user
     const testEmail = `test-${Date.now()}@example.com`;
     const hashedPassword = await bcrypt.hash('TestPassword123!', 10);
-    
+
     const testUser = {
       name: 'Test User',
       email: testEmail,
       password: hashedPassword,
-      role: 'traveler',
+      role: 'student',
     };
-    
+
     console.log('Attempting to create test user:', { ...testUser, password: '[REDACTED]' });
-    
+
     // Create user directly
     const newUser = await User.create(testUser);
     console.log('Test user created successfully:', newUser._id);
-    
+
     // Get count of all users
     const userCount = await User.countDocuments();
     console.log('Total users in database:', userCount);
-    
+
     return NextResponse.json({
       success: true,
       message: 'Database test completed successfully',
@@ -56,7 +56,7 @@ export async function GET() {
     });
   } catch (error) {
     console.error('Database test error:', error);
-    
+
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

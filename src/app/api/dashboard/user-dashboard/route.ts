@@ -20,45 +20,45 @@ export async function GET() {
     // Get token from cookies
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
-    
+
     if (!token) {
       return NextResponse.json({ error: 'Authentication required' }, { status: 401 });
     }
-    
+
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as DecodedToken;
-    
+
     // Connect to MongoDB and ensure models are registered
     await connectDB();
     registerModels();
-    
+
     // Find user in database
     const user = await User.findById(decoded.id);
-    
+
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
-    
+
     // Fetch user's bookings
-    const allBookings = await Booking.find({ 
-      travelerId: user._id 
+    const allBookings = await Booking.find({
+      studentId: user._id
     })
-    .sort({ createdAt: -1 })
-    .populate('guideId', 'name avatar')
-    .populate('tourId', 'title images location');
-    
+      .sort({ createdAt: -1 })
+      .populate('guideId', 'name avatar')
+      .populate('tourId', 'title images location');
+
     const now = new Date();
-    
+
     // Process bookings into upcoming and past
     const upcomingBookings = [];
     const pastBookings = [];
-    
+
     try {
       for (const booking of allBookings) {
         const bookingDate = new Date(booking.date);
-        const isUpcoming = bookingDate >= now || 
-                           (booking.status !== 'cancelled' && booking.status !== 'completed');
-        
+        const isUpcoming = bookingDate >= now ||
+          (booking.status !== 'cancelled' && booking.status !== 'completed');
+
         const processedBooking = {
           id: booking._id.toString(),
           tourName: booking.tourName || 'Unnamed Tour',
@@ -70,7 +70,7 @@ export async function GET() {
           image: booking.tourId?.images?.[0] || 'https://images.unsplash.com/photo-1528493859953-39d70f2a62f2',
           hasReviewed: booking.hasReviewed || false
         };
-        
+
         if (isUpcoming) {
           upcomingBookings.push(processedBooking);
         } else {
@@ -81,7 +81,7 @@ export async function GET() {
       console.error('Error processing bookings:', err);
       // Continue with empty bookings arrays
     }
-    
+
     // Fetch saved guides
     const savedGuides = [];
     if (user.savedGuides && user.savedGuides.length > 0) {
@@ -90,7 +90,7 @@ export async function GET() {
           _id: { $in: user.savedGuides },
           role: 'guide'
         });
-        
+
         for (const guide of guidesData) {
           savedGuides.push({
             id: guide._id.toString(),
@@ -106,7 +106,7 @@ export async function GET() {
         // Continue with empty savedGuides array
       }
     }
-    
+
     // Construct user data response
     const userData = {
       name: user.name,
@@ -125,19 +125,19 @@ export async function GET() {
       pastBookings,
       savedGuides
     };
-    
+
     return NextResponse.json({
       success: true,
       userData
     });
-    
+
   } catch (error) {
     console.error('Error fetching dashboard data:', error);
-    
+
     if (error instanceof jwt.JsonWebTokenError) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
-    
+
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Failed to fetch dashboard data'

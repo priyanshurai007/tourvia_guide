@@ -1,14 +1,26 @@
-'use client';
+"use client";
 
-import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
-import { 
-  FaUsers, FaMapMarkedAlt, FaCalendarAlt, FaStar, 
-  FaArrowUp, FaArrowDown, FaEllipsisH, FaExclamationCircle,
-  FaUserPlus, FaFileAlt, FaChartLine, FaRupeeSign, FaEye, FaFileExport, FaPrint
-} from 'react-icons/fa';
-import DateDisplay from '@/components/DateDisplay';
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import Image from "next/image";
+import {
+  FaUsers,
+  FaMapMarkedAlt,
+  FaCalendarAlt,
+  FaStar,
+  FaArrowUp,
+  FaArrowDown,
+  FaEllipsisH,
+  FaExclamationCircle,
+  FaUserPlus,
+  FaFileAlt,
+  FaChartLine,
+  FaRupeeSign,
+  FaEye,
+  FaFileExport,
+  FaPrint,
+} from "react-icons/fa";
+import DateDisplay from "@/components/DateDisplay";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -47,15 +59,15 @@ interface DashboardStats {
 // Booking Interface
 interface Booking {
   _id: string;
-  travelerId: {
+  studentId: {
     _id: string;
     name: string;
     email: string;
     avatar: string;
     phone: string;
   };
-  travelerName: string;
-  travelerEmail: string;
+  studentName: string;
+  studentEmail: string;
   guideId: {
     _id: string;
     name: string;
@@ -89,7 +101,7 @@ interface Destination {
 // Alert Interface
 interface Alert {
   id: string;
-  type: 'warning' | 'danger' | 'info' | 'success';
+  type: "warning" | "danger" | "info" | "success";
   message: string;
   time: string;
 }
@@ -112,25 +124,50 @@ export default function AdminDashboard() {
     guidesChange: 0,
     destinationsChange: 0,
     bookingsChange: 0,
-    ratingChange: 0
+    ratingChange: 0,
   });
   const [recentBookings, setRecentBookings] = useState<Booking[]>([]);
-  const [popularDestinations, setPopularDestinations] = useState<Destination[]>([]);
+  const [popularDestinations, setPopularDestinations] = useState<Destination[]>(
+    []
+  );
   const [monthlyRevenue, setMonthlyRevenue] = useState<MonthlyRevenue[]>([]);
   const [totalRevenue, setTotalRevenue] = useState<number>(0);
-  const [highestMonth, setHighestMonth] = useState<{month: string, amount: number}>({month: '', amount: 0});
+  const [highestMonth, setHighestMonth] = useState<{
+    month: string;
+    amount: number;
+  }>({ month: "", amount: 0 });
   const [averageRevenue, setAverageRevenue] = useState<number>(0);
 
   // Alerts are typically not stored in the database, so keeping them hardcoded
   const recentAlerts: Alert[] = [
-    { id: '1', type: 'warning', message: 'Low availability for Delhi tours next week', time: '2 hours ago' },
-    { id: '2', type: 'danger', message: 'Guide Raj Mehta has requested profile changes', time: '5 hours ago' },
-    { id: '3', type: 'info', message: '3 new customer support tickets waiting for response', time: '1 day ago' },
+    {
+      id: "1",
+      type: "warning",
+      message: "Low availability for Delhi tours next week",
+      time: "2 hours ago",
+    },
+    {
+      id: "2",
+      type: "danger",
+      message: "Guide Raj Mehta has requested profile changes",
+      time: "5 hours ago",
+    },
+    {
+      id: "3",
+      type: "info",
+      message: "3 new customer support tickets waiting for response",
+      time: "1 day ago",
+    },
   ];
 
   // Add state for alert messages
   const [alerts, setAlerts] = useState<Alert[]>([
-    { id: '1', type: 'info', message: 'Welcome to the admin dashboard! Here you can monitor all activities.' },
+    {
+      id: "1",
+      type: "info",
+      message:
+        "Welcome to the admin dashboard! Here you can monitor all activities.",
+    },
   ]);
 
   // Fetch dashboard data
@@ -138,11 +175,11 @@ export default function AdminDashboard() {
     const fetchDashboardData = async () => {
       setLoading(true);
       try {
-        const response = await fetch('/api/admin/dashboard');
+        const response = await fetch("/api/admin/dashboard");
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || 'Failed to fetch dashboard data');
+          throw new Error(data.error || "Failed to fetch dashboard data");
         }
 
         if (data.success) {
@@ -151,11 +188,12 @@ export default function AdminDashboard() {
             totalGuides: data.stats.totalGuides || 0,
             totalDestinations: data.stats.totalDestinations || 0,
             monthlyBookings: data.stats.monthlyBookings || 0,
-            averageRating: parseFloat(data.stats.averageRating?.toFixed(1)) || 0,
+            averageRating:
+              parseFloat(data.stats.averageRating?.toFixed(1)) || 0,
             guidesChange: data.stats.guidesChange || 0,
             destinationsChange: data.stats.destinationsChange || 0,
             bookingsChange: data.stats.bookingsChange || 0,
-            ratingChange: data.stats.ratingChange || 0
+            ratingChange: data.stats.ratingChange || 0,
           });
 
           // Set recent bookings
@@ -167,24 +205,28 @@ export default function AdminDashboard() {
           // Set monthly revenue data and calculate stats
           if (data.monthlyRevenue && data.monthlyRevenue.length > 0) {
             setMonthlyRevenue(data.monthlyRevenue);
-            
+
             // Calculate total revenue
-            const total = data.monthlyRevenue.reduce((acc: number, curr: MonthlyRevenue) => acc + curr.amount, 0);
+            const total = data.monthlyRevenue.reduce(
+              (acc: number, curr: MonthlyRevenue) => acc + curr.amount,
+              0
+            );
             setTotalRevenue(total);
-            
+
             // Find highest month
             const highest = data.monthlyRevenue.reduce(
-              (max: MonthlyRevenue, curr: MonthlyRevenue) => curr.amount > max.amount ? curr : max, 
+              (max: MonthlyRevenue, curr: MonthlyRevenue) =>
+                curr.amount > max.amount ? curr : max,
               data.monthlyRevenue[0]
             );
             setHighestMonth(highest);
-            
+
             // Calculate average
             setAverageRevenue(total / data.monthlyRevenue.length);
           }
         }
       } catch (err: any) {
-        console.error('Error fetching dashboard data:', err);
+        console.error("Error fetching dashboard data:", err);
         setError(err.message);
       } finally {
         setLoading(false);
@@ -196,14 +238,14 @@ export default function AdminDashboard() {
 
   // Function to close an alert
   const closeAlert = (id: string) => {
-    setAlerts(alerts.filter(alert => alert.id !== id));
+    setAlerts(alerts.filter((alert) => alert.id !== id));
   };
 
   // Function to format currency
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
       maximumFractionDigits: 0,
     }).format(amount);
   };
@@ -211,23 +253,23 @@ export default function AdminDashboard() {
   // Function to format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
   // Chart data configuration
   const chartData = {
-    labels: monthlyRevenue.map(month => month.month),
+    labels: monthlyRevenue.map((month) => month.month),
     datasets: [
       {
-        label: 'Monthly Revenue',
-        data: monthlyRevenue.map(month => month.amount),
+        label: "Monthly Revenue",
+        data: monthlyRevenue.map((month) => month.amount),
         fill: false,
-        backgroundColor: 'rgba(75, 192, 192, 0.2)',
-        borderColor: 'rgba(75, 192, 192, 1)',
+        backgroundColor: "rgba(75, 192, 192, 0.2)",
+        borderColor: "rgba(75, 192, 192, 1)",
         tension: 0.4,
       },
     ],
@@ -237,33 +279,33 @@ export default function AdminDashboard() {
     responsive: true,
     plugins: {
       legend: {
-        position: 'top' as const,
+        position: "top" as const,
         labels: {
-          color: '#e2e8f0',
+          color: "#e2e8f0",
         },
       },
       title: {
         display: true,
-        text: 'Monthly Revenue (Current Year)',
-        color: '#e2e8f0',
+        text: "Monthly Revenue (Current Year)",
+        color: "#e2e8f0",
       },
     },
     scales: {
       y: {
         ticks: {
-          color: '#e2e8f0',
+          color: "#e2e8f0",
           callback: (value: number) => formatCurrency(value),
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: "rgba(255, 255, 255, 0.1)",
         },
       },
       x: {
         ticks: {
-          color: '#e2e8f0',
+          color: "#e2e8f0",
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)',
+          color: "rgba(255, 255, 255, 0.1)",
         },
       },
     },
@@ -281,7 +323,9 @@ export default function AdminDashboard() {
       <div className="flex items-center justify-center h-screen bg-gray-900">
         <div className="text-center">
           <div className="w-16 h-16 border-t-4 border-b-4 border-orange-500 rounded-full animate-spin mx-auto"></div>
-          <p className="mt-4 text-xl text-gray-200">Loading dashboard data...</p>
+          <p className="mt-4 text-xl text-gray-200">
+            Loading dashboard data...
+          </p>
         </div>
       </div>
     );
@@ -293,13 +337,26 @@ export default function AdminDashboard() {
       <div className="flex items-center justify-center h-screen bg-gray-900">
         <div className="text-center p-8 bg-gray-800 rounded-lg shadow-lg max-w-md">
           <div className="text-red-500 text-5xl mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-16 w-16 mx-auto"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+              />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2">Error Loading Dashboard</h1>
+          <h1 className="text-2xl font-bold text-white mb-2">
+            Error Loading Dashboard
+          </h1>
           <p className="text-gray-300 mb-4">{error}</p>
-          <button 
+          <button
             onClick={() => window.location.reload()}
             className="px-4 py-2 bg-orange-600 text-white rounded hover:bg-orange-500 transition-colors"
           >
@@ -312,55 +369,58 @@ export default function AdminDashboard() {
 
   // Stats config for rendering
   const statsConfig = [
-    { 
-      title: 'Total Guides', 
-      value: stats.totalGuides, 
-      change: stats.guidesChange, 
-      icon: FaUsers, 
-      color: 'bg-blue-600', 
-      lightColor: 'bg-blue-500/20', 
-      textColor: 'text-blue-400' 
+    {
+      title: "Total Guides",
+      value: stats.totalGuides,
+      change: stats.guidesChange,
+      icon: FaUsers,
+      color: "bg-blue-600",
+      lightColor: "bg-blue-500/20",
+      textColor: "text-blue-400",
     },
-    { 
-      title: 'Total Destinations', 
-      value: stats.totalDestinations, 
-      change: stats.destinationsChange, 
-      icon: FaMapMarkedAlt, 
-      color: 'bg-green-600', 
-      lightColor: 'bg-green-500/20', 
-      textColor: 'text-green-400' 
+    {
+      title: "Total Destinations",
+      value: stats.totalDestinations,
+      change: stats.destinationsChange,
+      icon: FaMapMarkedAlt,
+      color: "bg-green-600",
+      lightColor: "bg-green-500/20",
+      textColor: "text-green-400",
     },
-    { 
-      title: 'Bookings This Month', 
-      value: stats.monthlyBookings, 
-      change: stats.bookingsChange, 
-      icon: FaCalendarAlt, 
-      color: 'bg-purple-600', 
-      lightColor: 'bg-purple-500/20', 
-      textColor: 'text-purple-400' 
+    {
+      title: "Bookings This Month",
+      value: stats.monthlyBookings,
+      change: stats.bookingsChange,
+      icon: FaCalendarAlt,
+      color: "bg-purple-600",
+      lightColor: "bg-purple-500/20",
+      textColor: "text-purple-400",
     },
-    { 
-      title: 'Average Rating', 
-      value: stats.averageRating, 
-      change: stats.ratingChange, 
-      icon: FaStar, 
-      color: 'bg-amber-600', 
-      lightColor: 'bg-amber-500/20', 
-      textColor: 'text-amber-400' 
+    {
+      title: "Average Rating",
+      value: stats.averageRating,
+      change: stats.ratingChange,
+      icon: FaStar,
+      color: "bg-amber-600",
+      lightColor: "bg-amber-500/20",
+      textColor: "text-amber-400",
     },
   ];
 
   // Find max value for chart scaling
-  const maxRevenueValue = monthlyRevenue.length > 0 
-    ? Math.max(...monthlyRevenue.map(item => item.amount)) 
-    : 1;
+  const maxRevenueValue =
+    monthlyRevenue.length > 0
+      ? Math.max(...monthlyRevenue.map((item) => item.amount))
+      : 1;
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-white">Admin Dashboard</h1>
-          <p className="text-gray-400 mt-1">Welcome back! Here's what's happening today.</p>
+          <p className="text-gray-400 mt-1">
+            Welcome back! Here's what's happening today.
+          </p>
         </div>
         <div className="flex mt-4 sm:mt-0 space-x-3">
           <button className="flex items-center px-4 py-2 bg-gray-800 text-white rounded-md hover:bg-gray-700 transition">
@@ -381,13 +441,13 @@ export default function AdminDashboard() {
             <div
               key={alert.id}
               className={`p-4 mb-4 rounded-md flex justify-between items-center ${
-                alert.type === 'info'
-                  ? 'bg-blue-900/40 text-blue-200 border border-blue-800'
-                  : alert.type === 'warning'
-                  ? 'bg-yellow-900/40 text-yellow-200 border border-yellow-800'
-                  : alert.type === 'success'
-                  ? 'bg-green-900/40 text-green-200 border border-green-800'
-                  : 'bg-red-900/40 text-red-200 border border-red-800'
+                alert.type === "info"
+                  ? "bg-blue-900/40 text-blue-200 border border-blue-800"
+                  : alert.type === "warning"
+                  ? "bg-yellow-900/40 text-yellow-200 border border-yellow-800"
+                  : alert.type === "success"
+                  ? "bg-green-900/40 text-green-200 border border-green-800"
+                  : "bg-red-900/40 text-red-200 border border-red-800"
               }`}
             >
               <p>{alert.message}</p>
@@ -415,8 +475,13 @@ export default function AdminDashboard() {
                 <stat.icon size={24} className={stat.textColor} />
               </span>
             </div>
-            <div className={`mt-4 text-sm ${(stat.change > 0 ? 'text-green-400' : 'text-red-400')}`}>
-              {stat.change > 0 ? '↑' : '↓'} {Math.abs(stat.change)}% since last month
+            <div
+              className={`mt-4 text-sm ${
+                stat.change > 0 ? "text-green-400" : "text-red-400"
+              }`}
+            >
+              {stat.change > 0 ? "↑" : "↓"} {Math.abs(stat.change)}% since last
+              month
             </div>
           </div>
         ))}
@@ -430,20 +495,26 @@ export default function AdminDashboard() {
           <div className="h-80">
             <Line data={chartData} options={chartOptions} />
           </div>
-          
+
           {/* Revenue stats */}
           <div className="grid grid-cols-3 gap-4 mt-6">
             <div className="bg-gray-700/50 p-4 rounded-lg">
               <p className="text-gray-400 text-sm">Total Revenue</p>
-              <p className="text-xl font-semibold mt-1">{formatCurrency(totalRevenue)}</p>
+              <p className="text-xl font-semibold mt-1">
+                {formatCurrency(totalRevenue)}
+              </p>
             </div>
             <div className="bg-gray-700/50 p-4 rounded-lg">
               <p className="text-gray-400 text-sm">Highest Month</p>
-              <p className="text-xl font-semibold mt-1">{highestMonth.month} ({formatCurrency(highestMonth.amount)})</p>
+              <p className="text-xl font-semibold mt-1">
+                {highestMonth.month} ({formatCurrency(highestMonth.amount)})
+              </p>
             </div>
             <div className="bg-gray-700/50 p-4 rounded-lg">
               <p className="text-gray-400 text-sm">Avg Monthly</p>
-              <p className="text-xl font-semibold mt-1">{formatCurrency(averageRevenue)}</p>
+              <p className="text-xl font-semibold mt-1">
+                {formatCurrency(averageRevenue)}
+              </p>
             </div>
           </div>
         </div>
@@ -452,27 +523,35 @@ export default function AdminDashboard() {
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-xl font-bold">Recent Bookings</h2>
-            <a href="/admin/bookings" className="text-teal-400 hover:text-teal-300 text-sm flex items-center">
+            <a
+              href="/admin/bookings"
+              className="text-teal-400 hover:text-teal-300 text-sm flex items-center"
+            >
               <span>View all</span>
               <FaEye className="ml-1" />
             </a>
           </div>
-          
+
           <div className="space-y-4">
             {recentBookings.length > 0 ? (
               recentBookings.map((booking) => (
-                <div key={booking._id} className="bg-gray-700/40 p-4 rounded-lg">
+                <div
+                  key={booking._id}
+                  className="bg-gray-700/40 p-4 rounded-lg"
+                >
                   <div className="flex items-center mb-2">
                     <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-600 mr-3">
-                      <img 
-                        src={booking.travelerId.avatar} 
-                        alt={booking.travelerId.name}
+                      <img
+                        src={booking.studentId.avatar}
+                        alt={booking.studentId.name}
                         className="w-full h-full object-cover"
                       />
                     </div>
                     <div>
-                      <h4 className="font-medium">{booking.travelerName}</h4>
-                      <p className="text-sm text-gray-400">with {booking.guideName}</p>
+                      <h4 className="font-medium">{booking.studentName}</h4>
+                      <p className="text-sm text-gray-400">
+                        with {booking.guideName}
+                      </p>
                     </div>
                   </div>
                   <div className="flex justify-between text-sm">
@@ -486,17 +565,25 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <p className="text-gray-400">Amount</p>
-                      <p className="font-medium text-teal-400">{formatCurrency(booking.totalPrice)}</p>
+                      <p className="font-medium text-teal-400">
+                        {formatCurrency(booking.totalPrice)}
+                      </p>
                     </div>
                   </div>
                   <div className="mt-2">
-                    <span className={`inline-block px-2 py-1 text-xs rounded ${
-                      booking.status === 'confirmed' ? 'bg-green-900/50 text-green-400' :
-                      booking.status === 'pending' ? 'bg-yellow-900/50 text-yellow-400' :
-                      booking.status === 'completed' ? 'bg-blue-900/50 text-blue-400' :
-                      'bg-red-900/50 text-red-400'
-                    }`}>
-                      {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                    <span
+                      className={`inline-block px-2 py-1 text-xs rounded ${
+                        booking.status === "confirmed"
+                          ? "bg-green-900/50 text-green-400"
+                          : booking.status === "pending"
+                          ? "bg-yellow-900/50 text-yellow-400"
+                          : booking.status === "completed"
+                          ? "bg-blue-900/50 text-blue-400"
+                          : "bg-red-900/50 text-red-400"
+                      }`}
+                    >
+                      {booking.status.charAt(0).toUpperCase() +
+                        booking.status.slice(1)}
                     </span>
                   </div>
                 </div>
@@ -516,17 +603,22 @@ export default function AdminDashboard() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {popularDestinations.length > 0 ? (
             popularDestinations.map((destination) => (
-              <div key={destination._id} className="bg-gray-800 rounded-lg overflow-hidden shadow-lg">
+              <div
+                key={destination._id}
+                className="bg-gray-800 rounded-lg overflow-hidden shadow-lg"
+              >
                 <div className="h-40 overflow-hidden">
-                  <img 
-                    src={destination.image || "/placeholder-destination.jpg"} 
-                    alt={destination.name} 
+                  <img
+                    src={destination.image || "/placeholder-destination.jpg"}
+                    alt={destination.name}
                     className="w-full h-full object-cover transition-transform hover:scale-110 duration-200"
                   />
                 </div>
                 <div className="p-4">
                   <h3 className="font-semibold mb-1">{destination.name}</h3>
-                  <p className="text-sm text-gray-400">{destination.bookingsCount} bookings</p>
+                  <p className="text-sm text-gray-400">
+                    {destination.bookingsCount} bookings
+                  </p>
                 </div>
               </div>
             ))

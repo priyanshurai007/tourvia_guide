@@ -23,7 +23,7 @@ export async function POST(request: Request) {
     console.log('Starting user registration process');
     await connectDB();
     console.log('Connected to database');
-    
+
     // Parse request body
     const body = await request.json();
     console.log('Received registration data:', { ...body, password: '[REDACTED]' });
@@ -57,9 +57,9 @@ export async function POST(request: Request) {
       name,
       email,
       password,
-      role: 'traveler',
+      role: 'student',
     };
-    
+
     const user = await User.create(newUser);
     console.log('User created successfully with ID:', user._id);
 
@@ -79,7 +79,7 @@ export async function POST(request: Request) {
     };
 
     console.log('Registration successful for:', email);
-    
+
     return NextResponse.json({
       user: userResponse,
       token,

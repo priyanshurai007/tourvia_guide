@@ -22,26 +22,26 @@ export async function GET() {
     }
 
     const decoded = jwt.verify(token, secret) as any;
-    
+
     // Support different token formats (id or userId)
     const guideId = decoded.id || decoded.userId;
-    
+
     if (!guideId) {
       return NextResponse.json({ success: false, error: 'Invalid token format' }, { status: 401 });
     }
-    
+
     if (decoded.role !== 'guide') {
       return NextResponse.json({ success: false, error: 'Unauthorized access' }, { status: 403 });
     }
-    
+
     // Connect to MongoDB
     await connectDB();
-    
+
     // Generate a test booking
     const testBooking = {
-      travelerId: new mongoose.Types.ObjectId(),
-      travelerName: 'Test Traveler',
-      travelerEmail: 'test@traveler.com',
+      studentId: new mongoose.Types.ObjectId(),
+      studentName: 'Test Student',
+      studentEmail: 'test@student.com',
       guideId: guideId,
       guideName: decoded.name || 'Test Guide',
       tourId: new mongoose.Types.ObjectId(),
@@ -52,26 +52,26 @@ export async function GET() {
       status: 'pending',
       createdAt: new Date()
     };
-    
+
     // Create booking
     const booking = new Booking(testBooking);
     await booking.save();
-    
-    return NextResponse.json({ 
-      success: true, 
+
+    return NextResponse.json({
+      success: true,
       message: 'Test booking created successfully',
       booking: {
         id: booking._id.toString(),
         ...testBooking,
         guideId: booking.guideId.toString(),
         tourId: booking.tourId.toString(),
-        travelerId: booking.travelerId.toString(),
+        studentId: booking.studentId.toString(),
       }
     });
   } catch (error) {
     console.error('Error creating test booking:', error);
-    return NextResponse.json({ 
-      success: false, 
+    return NextResponse.json({
+      success: false,
       error: error instanceof Error ? error.message : 'Error creating test booking'
     }, { status: 500 });
   }

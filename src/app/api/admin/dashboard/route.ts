@@ -40,8 +40,8 @@ export async function GET() {
         .sort({ createdAt: -1 })
         .limit(5)
         .populate('guideId', 'name email phone avatar')
-            .populate('tourId', 'title price')
-            .populate('travelerId', 'name email phone avatar'),
+        .populate('tourId', 'title price')
+        .populate('studentId', 'name email phone avatar'),
       Destination.aggregate([
         {
           $lookup: {
@@ -105,7 +105,7 @@ export async function GET() {
     const averageRating = reviews.reduce((acc, curr) => acc + curr.rating, 0) / reviews.length;
 
     // Calculate percentage changes
-    const bookingsChange = lastMonthBookings === 0 ? 100 : 
+    const bookingsChange = lastMonthBookings === 0 ? 100 :
       ((monthlyBookings - lastMonthBookings) / lastMonthBookings) * 100;
 
     return NextResponse.json({

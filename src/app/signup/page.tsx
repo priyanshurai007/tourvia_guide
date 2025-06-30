@@ -1,80 +1,84 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 export default function Signup() {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [userType, setUserType] = useState('traveler');
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [userType, setUserType] = useState("student");
   const [agreeToTerms, setAgreeToTerms] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setIsLoading(true);
-    
+
     // Validate passwords match
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       setIsLoading(false);
       return;
     }
-    
+
     // Validate password length
     if (password.length < 8) {
-      setError('Password must be at least 8 characters long');
+      setError("Password must be at least 8 characters long");
       setIsLoading(false);
       return;
     }
-    
+
     // Validate terms agreement
     if (!agreeToTerms) {
-      setError('You must agree to the terms and conditions');
+      setError("You must agree to the terms and conditions");
       setIsLoading(false);
       return;
     }
-    
+
     try {
       // Send registration request to API
-      const response = await fetch('/api/auth/direct-register', {
-        method: 'POST',
+      const response = await fetch("/api/auth/direct-register", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           name: `${firstName} ${lastName}`,
           email,
           password,
-          role: userType // Send the selected user type
+          role: userType, // Send the selected user type
         }),
       });
-      
+
       const data = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(data.error || 'Registration failed');
+        throw new Error(data.error || "Registration failed");
       }
-      
+
       // Store token in localStorage
-      localStorage.setItem('token', data.token);
-      
+      localStorage.setItem("token", data.token);
+
       // Redirect based on user type
-      if (data.user.role === 'guide') {
-        router.push('/guide-dashboard');
+      if (data.user.role === "guide") {
+        router.push("/guide-dashboard");
       } else {
-        router.push('/traveler/dashboard');
+        router.push("/student/dashboard");
       }
     } catch (err) {
-      console.error('Registration error:', err);
-      setError(err instanceof Error ? err.message : 'An error occurred during registration');
+      console.error("Registration error:", err);
+      setError(
+        err instanceof Error
+          ? err.message
+          : "An error occurred during registration"
+      );
     } finally {
       setIsLoading(false);
     }
@@ -84,9 +88,12 @@ export default function Signup() {
     <div className="min-h-screen bg-gray-900 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="text-center">
-          <h2 className="text-3xl font-extrabold text-white">Create your account</h2>
+          <h2 className="text-3xl font-extrabold text-white">
+            Create your account
+          </h2>
           <p className="mt-2 text-sm text-gray-400">
-            Join TourGuide Connect and start exploring the world with local guides
+            Join TourGuide Connect and start exploring the world with local
+            guides
           </p>
         </div>
       </div>
@@ -94,7 +101,10 @@ export default function Signup() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
           {error && (
-            <div className="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded mb-4" role="alert">
+            <div
+              className="bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded mb-4"
+              role="alert"
+            >
               {error}
             </div>
           )}
@@ -102,7 +112,10 @@ export default function Signup() {
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-2">
               <div>
-                <label htmlFor="first-name" className="block text-sm font-medium text-gray-300">
+                <label
+                  htmlFor="first-name"
+                  className="block text-sm font-medium text-gray-300"
+                >
                   First name
                 </label>
                 <div className="mt-1">
@@ -120,7 +133,10 @@ export default function Signup() {
               </div>
 
               <div>
-                <label htmlFor="last-name" className="block text-sm font-medium text-gray-300">
+                <label
+                  htmlFor="last-name"
+                  className="block text-sm font-medium text-gray-300"
+                >
                   Last name
                 </label>
                 <div className="mt-1">
@@ -139,7 +155,10 @@ export default function Signup() {
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-300"
+              >
                 Email address
               </label>
               <div className="mt-1">
@@ -158,7 +177,10 @@ export default function Signup() {
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-300"
+              >
                 Password
               </label>
               <div className="mt-1">
@@ -176,7 +198,10 @@ export default function Signup() {
             </div>
 
             <div>
-              <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-300">
+              <label
+                htmlFor="confirm-password"
+                className="block text-sm font-medium text-gray-300"
+              >
                 Confirm password
               </label>
               <div className="mt-1">
@@ -200,15 +225,18 @@ export default function Signup() {
               <div className="mt-2 space-y-2">
                 <div className="flex items-center">
                   <input
-                    id="user-type-traveler"
+                    id="user-type-student"
                     name="user-type"
                     type="radio"
-                    checked={userType === 'traveler'}
-                    onChange={() => setUserType('traveler')}
+                    checked={userType === "student"}
+                    onChange={() => setUserType("student")}
                     className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-700 bg-gray-700"
                   />
-                  <label htmlFor="user-type-traveler" className="ml-2 block text-sm text-gray-300">
-                    Traveler looking for guides
+                  <label
+                    htmlFor="user-type-student"
+                    className="ml-2 block text-sm text-gray-300"
+                  >
+                    Student looking for guides
                   </label>
                 </div>
                 <div className="flex items-center">
@@ -216,11 +244,14 @@ export default function Signup() {
                     id="user-type-guide"
                     name="user-type"
                     type="radio"
-                    checked={userType === 'guide'}
-                    onChange={() => setUserType('guide')}
+                    checked={userType === "guide"}
+                    onChange={() => setUserType("guide")}
                     className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-700 bg-gray-700"
                   />
-                  <label htmlFor="user-type-guide" className="ml-2 block text-sm text-gray-300">
+                  <label
+                    htmlFor="user-type-guide"
+                    className="ml-2 block text-sm text-gray-300"
+                  >
                     Local guide offering services
                   </label>
                 </div>
@@ -236,12 +267,15 @@ export default function Signup() {
                 onChange={(e) => setAgreeToTerms(e.target.checked)}
                 className="h-4 w-4 text-orange-600 focus:ring-orange-500 border-gray-700 rounded bg-gray-700"
               />
-              <label htmlFor="agree-terms" className="ml-2 block text-sm text-gray-300">
-                I agree to the{' '}
+              <label
+                htmlFor="agree-terms"
+                className="ml-2 block text-sm text-gray-300"
+              >
+                I agree to the{" "}
                 <a href="#" className="text-orange-400 hover:text-orange-300">
                   Terms of Service
-                </a>{' '}
-                and{' '}
+                </a>{" "}
+                and{" "}
                 <a href="#" className="text-orange-400 hover:text-orange-300">
                   Privacy Policy
                 </a>
@@ -253,18 +287,23 @@ export default function Signup() {
                 type="submit"
                 disabled={isLoading}
                 className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white ${
-                  isLoading ? 'bg-orange-500' : 'bg-orange-600 hover:bg-orange-700'
+                  isLoading
+                    ? "bg-orange-500"
+                    : "bg-orange-600 hover:bg-orange-700"
                 } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 focus:ring-offset-gray-800`}
               >
-                {isLoading ? 'Creating account...' : 'Create account'}
+                {isLoading ? "Creating account..." : "Create account"}
               </button>
             </div>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-400">
-              Already have an account?{' '}
-              <Link href="/login" className="font-medium text-orange-400 hover:text-orange-300">
+              Already have an account?{" "}
+              <Link
+                href="/login"
+                className="font-medium text-orange-400 hover:text-orange-300"
+              >
                 Sign in
               </Link>
             </p>
@@ -273,4 +312,4 @@ export default function Signup() {
       </div>
     </div>
   );
-} 
+}

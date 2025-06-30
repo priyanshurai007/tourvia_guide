@@ -28,20 +28,20 @@ export async function GET() {
     );
     console.log('Admin user created or updated:', adminUser._id);
 
-    // Create test traveler
-    console.log('Creating test traveler...');
-    const hashedTravelerPassword = await bcrypt.hash('traveler123', 10);
-    const travelerUser = await User.findOneAndUpdate(
-      { email: 'traveler@example.com' },
+    // Create test student
+    console.log('Creating test student...');
+    const hashedStudentPassword = await bcrypt.hash('student123', 10);
+    const studentUser = await User.findOneAndUpdate(
+      { email: 'student@example.com' },
       {
-        name: 'Test Traveler',
-        email: 'traveler@example.com',
-        password: hashedTravelerPassword,
-        role: 'traveler',
+        name: 'Test Student',
+        email: 'student@example.com',
+        password: hashedStudentPassword,
+        role: 'student',
       },
       { upsert: true, new: true }
     );
-    console.log('Traveler user created or updated:', travelerUser._id);
+    console.log('Student user created or updated:', studentUser._id);
 
     // Create test guide
     console.log('Creating test guide...');
@@ -104,11 +104,11 @@ export async function GET() {
     console.log('Creating test bookings...');
     const booking1 = await Booking.findOneAndUpdate(
       {
-        userId: travelerUser._id,
+        userId: studentUser._id,
         tourId: tour1._id,
       },
       {
-        userId: travelerUser._id,
+        userId: studentUser._id,
         tourId: tour1._id,
         bookingDate: new Date('2023-11-15'),
         numberOfParticipants: 2,
@@ -122,11 +122,11 @@ export async function GET() {
 
     const booking2 = await Booking.findOneAndUpdate(
       {
-        userId: travelerUser._id,
+        userId: studentUser._id,
         tourId: tour2._id,
       },
       {
-        userId: travelerUser._id,
+        userId: studentUser._id,
         tourId: tour2._id,
         bookingDate: new Date('2023-11-18'),
         numberOfParticipants: 3,
@@ -155,13 +155,13 @@ export async function GET() {
       },
       testCredentials: {
         admin: { email: 'admin@example.com', password: 'admin123' },
-        traveler: { email: 'traveler@example.com', password: 'traveler123' },
+        student: { email: 'student@example.com', password: 'student123' },
         guide: { email: 'guide@example.com', password: 'guide123' },
       },
     });
   } catch (error) {
     console.error('Database initialization error:', error);
-    
+
     return NextResponse.json({
       success: false,
       error: 'Database initialization failed',

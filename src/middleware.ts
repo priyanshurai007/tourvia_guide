@@ -99,8 +99,8 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  // For traveler dashboard routes
-  if (request.nextUrl.pathname.startsWith('/traveler/')) {
+  // For student dashboard routes
+  if (request.nextUrl.pathname.startsWith('/student/')) {
     // If no token is found, redirect to login
     if (!token) {
       return NextResponse.redirect(new URL('/login', request.url));
@@ -116,8 +116,8 @@ export function middleware(request: NextRequest) {
         return NextResponse.redirect(new URL('/login', request.url));
       }
 
-      // Check if the user has the traveler role
-      if (decoded.role !== 'traveler') {
+      // Check if the user has the student role
+      if (decoded.role !== 'student') {
         return NextResponse.redirect(new URL('/login', request.url));
       }
 
@@ -135,5 +135,5 @@ export function middleware(request: NextRequest) {
 
 // Configure the middleware to run only on specific paths
 export const config = {
-  matcher: ['/admin/:path*', '/dashboard/:path*', '/guide-dashboard/:path*', '/traveler/:path*'],
+  matcher: ['/admin/:path*', '/dashboard/:path*', '/guide-dashboard/:path*', '/student/:path*'],
 };

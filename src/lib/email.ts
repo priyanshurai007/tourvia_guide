@@ -32,14 +32,14 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
 }
 
 export function generateBookingConfirmationEmail({
-  travelerName,
+  studentName,
   guideName,
   tourName,
   date,
   participants,
   totalPrice
 }: {
-  travelerName: string;
+  studentName: string;
   guideName: string;
   tourName: string;
   date: string;
@@ -49,7 +49,7 @@ export function generateBookingConfirmationEmail({
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: #f97316;">Tour Booking Confirmation</h2>
-      <p>Dear ${travelerName},</p>
+      <p>Dear ${studentName},</p>
       <p>Thank you for booking a tour with ${guideName}!</p>
       
       <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
@@ -75,7 +75,7 @@ export function generateBookingConfirmationEmail({
 }
 
 export function generateBookingStatusUpdateEmail({
-  travelerName,
+  studentName,
   guideName,
   tourName,
   date,
@@ -84,7 +84,7 @@ export function generateBookingStatusUpdateEmail({
   status,
   guideContact = null
 }: {
-  travelerName: string;
+  studentName: string;
   guideName: string;
   tourName: string;
   date: string;
@@ -98,7 +98,7 @@ export function generateBookingStatusUpdateEmail({
   let statusColor = '';
   let statusTitle = '';
   let guideContactHTML = '';
-  
+
   // Add guide contact details HTML if provided (for confirmed bookings)
   if (guideContact && status === 'confirmed') {
     guideContactHTML = `
@@ -111,8 +111,8 @@ export function generateBookingStatusUpdateEmail({
       </div>
     `;
   }
-  
-  switch(status) {
+
+  switch (status) {
     case 'confirmed':
       statusTitle = 'Your Tour Booking is Confirmed!';
       statusColor = '#059669'; // green
@@ -136,7 +136,7 @@ export function generateBookingStatusUpdateEmail({
       statusColor = '#3B82F6'; // blue
       statusMessage = `
         <p>Your tour has been marked as completed by the guide. We hope you had a wonderful experience!</p>
-        <p>Please consider leaving a review to share your experience with other travelers.</p>
+        <p>Please consider leaving a review to share your experience with other students.</p>
         <p>Thank you for using our platform, and we hope to see you again soon!</p>
       `;
       break;
@@ -160,7 +160,7 @@ export function generateBookingStatusUpdateEmail({
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
       <h2 style="color: ${statusColor};">${statusTitle}</h2>
-      <p>Dear ${travelerName},</p>
+      <p>Dear ${studentName},</p>
       ${statusMessage}
       
       <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">

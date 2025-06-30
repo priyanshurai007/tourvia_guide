@@ -16,7 +16,7 @@ interface DecodedToken {
 export async function POST(request: Request) {
   try {
     console.log('Booking request received');
-    
+
     // Get token from cookies
     const cookieStore = await cookies();
     const token = cookieStore.get('token')?.value;
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     const decoded = jwt.verify(token, process.env.JWT_SECRET!) as DecodedToken;
     console.log(`User authenticated: ${decoded.id}, role: ${decoded.role}`);
 
-    // Check if user exists and is a traveler
+    // Check if user exists and is a student
     await connectDB();
     const user = await User.findById(decoded.id);
 
@@ -44,11 +44,11 @@ export async function POST(request: Request) {
         { status: 404 }
       );
     }
-    
-    if (user.role !== 'traveler') {
-      console.log(`User role not traveler: ${user.role}`);
+
+    if (user.role !== 'student') {
+      console.log(`User role not student: ${user.role}`);
       return NextResponse.json(
-        { success: false, error: 'Only travelers can create bookings' },
+        { success: false, error: 'Only students can create bookings' },
         { status: 403 }
       );
     }
@@ -60,7 +60,7 @@ export async function POST(request: Request) {
     // Validate required fields
     const requiredFields = ['guideId', 'guideName', 'tourId', 'tourName', 'date', 'participants', 'totalPrice'];
     const missingFields = requiredFields.filter(field => !bookingData[field]);
-    
+
     if (missingFields.length > 0) {
       console.log(`Missing required fields: ${missingFields.join(', ')}`);
       return NextResponse.json(
@@ -72,9 +72,9 @@ export async function POST(request: Request) {
     // Create new booking
     console.log('Creating new booking in database');
     const booking = new Booking({
-      travelerId: user._id,
-      travelerName: user.name,
-      travelerEmail: user.email,
+      studentId: user._id,
+      studentName: user.name,
+      studentEmail: user.email,
       ...bookingData,
       status: 'pending',
       createdAt: new Date()
@@ -88,7 +88,7 @@ export async function POST(request: Request) {
     try {
       console.log('Preparing to send confirmation email');
       const emailHtml = generateBookingConfirmationEmail({
-        travelerName: user.name,
+        studentName: user.name,
         guideName: bookingData.guideName,
         tourName: bookingData.tourName,
         date: bookingData.date,
@@ -161,15 +161,15 @@ export async function GET(request: Request) {
 
     // Get bookings based on user role
     let bookings;
-    if (user.role === 'traveler') {
-      bookings = await Booking.find({ travelerId: user._id })
+    if (user.role === 'student') {
+      bookings = await Booking.find({ studentId: user._id })
         .sort({ createdAt: -1 })
         .populate('guideId', 'name email phone')
         .populate('tourId', 'title price');
     } else if (user.role === 'guide') {
       bookings = await Booking.find({ guideId: user._id })
         .sort({ createdAt: -1 })
-        .populate('travelerId', 'name email')
+        .populate('studentId', 'name email')
         .populate('tourId', 'title price');
     }
 
@@ -178,7 +178,7 @@ export async function GET(request: Request) {
       bookings: bookings.map(booking => ({
         id: booking._id,
         guideId: booking.guideId,
-        travelerId: booking.travelerId,
+        studentId: booking.studentId,
         tourId: booking.tourId,
         date: booking.date,
         participants: booking.participants,

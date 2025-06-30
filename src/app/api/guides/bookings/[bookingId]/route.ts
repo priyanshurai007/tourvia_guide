@@ -24,14 +24,14 @@ export async function PATCH(request: Request, { params }: { params: { bookingId:
 
     try {
       const decoded = jwt.verify(token, jwtSecret) as any;
-      
+
       // Support both token formats (id or userId)
       const userId = decoded.id || decoded.userId;
-      
+
       if (!userId) {
         return NextResponse.json({ success: false, message: 'Invalid token format' }, { status: 401 });
       }
-      
+
       // Check if user is a guide
       if (decoded.role !== 'guide') {
         return NextResponse.json({ success: false, message: 'Unauthorized access' }, { status: 403 });
@@ -61,7 +61,7 @@ export async function PATCH(request: Request, { params }: { params: { bookingId:
 
       // Capture previous status for comparison
       const previousStatus = booking.status;
-      
+
       // Update the booking status
       booking.status = status;
       await booking.save();
@@ -72,7 +72,7 @@ export async function PATCH(request: Request, { params }: { params: { bookingId:
           // Format date for email
           const formattedDate = format(new Date(booking.date), 'MMMM d, yyyy');
           const formattedTime = booking.time || '09:00 AM';
-          
+
           // If status is confirmed, fetch guide contact details
           let guideContact = null;
           if (status === 'confirmed') {
@@ -85,10 +85,10 @@ export async function PATCH(request: Request, { params }: { params: { bookingId:
               console.log('Including guide contact details in confirmation email:', guideContact);
             }
           }
-          
+
           // Generate email content
           const emailHtml = generateBookingStatusUpdateEmail({
-            travelerName: booking.travelerName,
+            studentName: booking.studentName,
             guideName: booking.guideName,
             tourName: booking.tourName,
             date: `${formattedDate} at ${formattedTime}`,
@@ -97,23 +97,23 @@ export async function PATCH(request: Request, { params }: { params: { bookingId:
             status: status,
             guideContact: guideContact
           });
-          
-          // Send email to traveler
+
+          // Send email to student
           await sendEmail({
-            to: booking.travelerEmail,
+            to: booking.studentEmail,
             subject: `Your Tour Booking Status: ${status.charAt(0).toUpperCase() + status.slice(1)}`,
             html: emailHtml
           });
-          
-          console.log(`Booking status update email sent to ${booking.travelerEmail}`);
+
+          console.log(`Booking status update email sent to ${booking.studentEmail}`);
         } catch (emailError) {
           // Log email error but don't fail the request
           console.error('Error sending booking status email:', emailError);
         }
       }
 
-      return NextResponse.json({ 
-        success: true, 
+      return NextResponse.json({
+        success: true,
         message: 'Booking status updated successfully',
         booking: {
           id: booking._id.toString(),

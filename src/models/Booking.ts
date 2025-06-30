@@ -1,9 +1,9 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IBooking extends Document {
-  travelerId: mongoose.Types.ObjectId;
-  travelerName: string;
-  travelerEmail: string;
+  studentId: mongoose.Types.ObjectId;
+  studentName: string;
+  studentEmail: string;
   guideId: mongoose.Types.ObjectId;
   guideName: string;
   tourId: mongoose.Types.ObjectId;
@@ -18,16 +18,16 @@ export interface IBooking extends Document {
 }
 
 const bookingSchema = new Schema({
-  travelerId: {
+  studentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
-  travelerName: {
+  studentName: {
     type: String,
     required: true
   },
-  travelerEmail: {
+  studentEmail: {
     type: String,
     required: true
   },
@@ -83,7 +83,7 @@ const bookingSchema = new Schema({
 });
 
 // Create indexes for better query performance
-bookingSchema.index({ travelerId: 1, createdAt: -1 });
+bookingSchema.index({ studentId: 1, createdAt: -1 });
 bookingSchema.index({ guideId: 1, createdAt: -1 });
 bookingSchema.index({ date: 1 });
 
@@ -97,7 +97,7 @@ function getBookingModel(): Model<IBooking> {
   if (mongoose.models && mongoose.models.Booking) {
     return mongoose.models.Booking as Model<IBooking>;
   }
-  
+
   // If the model doesn't exist, create and return it
   try {
     return mongoose.model<IBooking>('Booking', bookingSchema);

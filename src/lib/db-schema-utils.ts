@@ -6,7 +6,7 @@ export interface UserDocument {
   name: string;
   email: string;
   password: string;
-  role: 'traveler' | 'guide' | 'admin';
+  role: 'student' | 'guide' | 'admin';
   avatar?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -140,17 +140,17 @@ export async function createDemoDataIfEmpty(db: Db): Promise<void> {
   if (usersCount === 0) {
     console.log('Creating demo user accounts...');
 
-    // Create a demo traveler
+    // Create a demo student
     const salt = await import('bcryptjs').then(bcrypt => bcrypt.genSalt(10));
     const hashPassword = await import('bcryptjs').then(bcrypt => bcrypt.hash('password123', salt));
 
     await db.collection('users').insertMany([
       {
-        name: 'Demo Traveler',
-        email: 'traveler@example.com',
+        name: 'Demo Student',
+        email: 'student@example.com',
         password: hashPassword,
-        role: 'traveler',
-        avatar: 'https://ui-avatars.com/api/?name=Demo+Traveler&background=random',
+        role: 'student',
+        avatar: 'https://ui-avatars.com/api/?name=Demo+Student&background=random',
         createdAt: new Date(),
         updatedAt: new Date()
       },
